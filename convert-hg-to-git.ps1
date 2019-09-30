@@ -19,16 +19,18 @@ Set-Location $inputRepo
 [string[]]$hashes = hg log -T '{node}\n'
 
 # add tags for every commit so git history can be searched by hg hash
-for ($i = 0; $i -lt $hashes.Length; $i++) {
+$tagRecords = $hashes
+for ($i = 0; $i -lt $tagRecords.Length; $i++) {
     $hash = $hashes[$i]
     $shortHash = $hash.Substring(0, 12)
-    $percent = $i / ($hashes.Length) * 100
-    Write-Progress -Activity "Adding tags for each revision..." -Status $hash -PercentComplete $percent
-    hg tag -r $hash $shortHash
-    if (!$stripHash) {
-        $stripHash = (hg log -T '{node}\n')[0]
-    }
+    $tagRecords[$i] = "$($hash) $($shortHash)"
 }
+Write-Output $tagRecords | Out-File -FilePath ".hgtags" -Encoding utf8NoBOM
+hg add ".hgtags"
+$originalTipHash = (hg log -T '{node}\n')[0]
+$tagCommitMessage = "Added revision tags on $($originalTipHash)"
+hg commit -m $tagCommitMessage
+$stripHash = (hg log -T '{node}\n')[0]
 
 # push the history over
 Set-Location $inputRepo
