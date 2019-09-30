@@ -4,6 +4,7 @@ if ($args.Length -ne 2) {
     exit 1
 }
 
+$workingDir = Get-Location
 $inputRepo = Resolve-Path "$(Get-Location)\$($args[0])"
 New-Item -path $args[1] -type directory
 $outputRepo = Resolve-Path "$(Get-Location)\$($args[1])"
@@ -54,3 +55,5 @@ for ($i = 0; $i -lt $heads.Length; $i++) {
 }
 Write-Progress -Activity "Create branches in new repo" -Status "Done" -PercentComplete 100
 git checkout master
+
+Set-Location $workingDir
