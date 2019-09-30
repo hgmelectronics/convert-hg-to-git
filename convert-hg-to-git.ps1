@@ -21,9 +21,10 @@ Set-Location $inputRepo
 # add tags for every commit so git history can be searched by hg hash
 for ($i = 0; $i -lt $hashes.Length; $i++) {
     $hash = $hashes[$i]
+    $shortHash = $hash.Substring(0, 12)
     $percent = $i / ($hashes.Length) * 100
     Write-Progress -Activity "Adding tags for each revision..." -Status $hash -PercentComplete $percent
-    hg tag -r $hash "hg-$($hash)"
+    hg tag -r $hash $shortHash
     if (!$stripHash) {
         $stripHash = (hg log -T '{node}\n')[0]
     }
@@ -46,7 +47,8 @@ for ($i = 0; $i -lt $heads.Length; $i++) {
     }
     $percent = $i / ($heads.Length) * 100
     Write-Progress -Activity "Create branches in new repo" -Status "Adding $($branch)" -PercentComplete $percent
-    git branch $branch "hg-$($hash)"
+    $shortHash = $hash.Substring(0, 12)
+    git branch $branch "$($shortHash)"
 }
 Write-Progress -Activity "Create branches in new repo" -Status "Done" -PercentComplete 100
 git checkout master
