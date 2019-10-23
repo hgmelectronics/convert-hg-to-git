@@ -5,9 +5,16 @@ if ($args.Length -ne 2) {
 }
 
 $workingDir = Get-Location
-$inputRepo = Resolve-Path "$(Get-Location)\$($args[0])"
+$inputRepo = Resolve-Path "$($workingDir)\$($args[0])"
+Set-Location $inputRepo
+[string[]]$hgStatus = hg status
+if ($hgStatus.Length -gt 0) {
+    Write-Output "Input repo is not clean"
+    exit 1
+}
+Set-Location $workingDir
 New-Item -path $args[1] -type directory
-$outputRepo = Resolve-Path "$(Get-Location)\$($args[1])"
+$outputRepo = Resolve-Path "$($workingDir)\$($args[1])"
 Read-Host "Converting from $($inputRepo) to $($outputRepo), press enter to continue"
 
 # create bare output repository
